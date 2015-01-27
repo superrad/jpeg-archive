@@ -1,4 +1,5 @@
 #include "util.h"
+#include "lodepng.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -220,6 +221,33 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
 
     return (*width) * (*height);
 }
+
+unsigned long decodePngFile(const char *filename, unsigned char **image, int *width, int *height) {
+    unsigned char *buf = NULL;
+    long bufSize = 0;
+
+    bufSize = readFile((char *) filename, (void **) &buf);
+
+    if (!bufSize) { return 0; }
+
+    return decodePpm(buf, bufSize, image, width, height);
+}
+
+unsigned long decodePng(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height) {
+
+    unsigned uwidth,uheight = 0;
+    unsigned error = lodepng_decode24(image, &uwidth, &uheight, buf, bufSize);
+    *width = uwidth;
+    *height = uheight;
+
+    if(error)
+        return 0;
+
+    return uwidth * uwidth * 3;
+}
+
+
+
 
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment) {
     unsigned int pos = 0;

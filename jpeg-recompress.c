@@ -58,6 +58,7 @@ float defishZoom = 1.0;
 
 // Input format
 int ppm = 0;
+int png = 0;
 
 // Whether to copy files that cannot be compressed
 int copyFiles = 1;
@@ -127,6 +128,10 @@ static void setZoom(command_t *self) {
 
 static void setPpm(command_t *self) {
     ppm = 1;
+}
+
+static void setPng(command_t *self){
+    png = 1;
 }
 
 static void setCopyFiles(command_t *self) {
@@ -247,6 +252,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
     command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
+    command_option(&cmd, "-g", "--png", "Parse input as PNG instead of JPEG", setPng);
     command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
     command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
     command_parse(&cmd, argc, argv);
@@ -272,12 +278,16 @@ int main (int argc, char **argv) {
 
     if (!bufSize) { return 1; }
 
-    if (!ppm) {
-        // Decode the JPEG
-        originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
-    } else {
+    if (ppm) {
         // Decode the PPM
         originalSize = decodePpm(buf, bufSize, &original, &width, &height);
+    }
+    else if(png) {
+        // Decode the PNG
+        originalSize = decodePng(buf, bufSize, &original, &width, &height);
+    } else {
+        // Decode the JPEG
+        originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
     }
 
     if (defishStrength) {
@@ -291,7 +301,7 @@ int main (int argc, char **argv) {
     // Convert RGB input into Y
     originalGraySize = grayscale(original, &originalGray, width, height);
 
-    if (!ppm) {
+    if (!(ppm || png)) {
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             fprintf(stderr, "File already processed by jpeg-recompress!\n");
@@ -447,7 +457,7 @@ int main (int argc, char **argv) {
     fwrite(COMMENT, 30, 1, file);
 
     // Write metadata markers
-    if (!strip && !ppm) {
+    if (!strip && !(ppm || png)) {
         fwrite(metaBuf, metaSize, 1, file);
     }
 
@@ -458,7 +468,7 @@ int main (int argc, char **argv) {
     // Cleanup
     command_free(&cmd);
 
-    if (!strip && !ppm) {
+    if (!strip && !(ppm || png)) {
         free(metaBuf);
     }
 
