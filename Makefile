@@ -3,7 +3,7 @@ CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
 MAKE ?= make
 PREFIX ?= /usr/local
-MOZJPEG_PREFIX ?= /usr/local/Cellar/mozjpeg/3.0
+MOZJPEG_PREFIX ?= /opt/mozjpeg
 
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
