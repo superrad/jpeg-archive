@@ -206,6 +206,7 @@ License
 JPEG-Archive is copyright &copy; 2014 Daniel G. Taylor
 Image Quality Assessment (IQA) is copyright 2011, Tom Distler (http://tdistler.com)
 SmallFry is copyright 2014, Derek Buitenhuis (https://github.com/dwbuiten)
+LodePNG is copyright (c) 2005-2014, Lode Vandevenne(http://lodev.org/lodepng)
 
 All are released under an MIT license.
 
